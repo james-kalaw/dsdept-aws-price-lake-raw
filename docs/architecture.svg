@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" font-family="DejaVu Sans, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#37475A"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1D8102"/></marker>
+  </defs>
+  <rect width="1500" height="900" fill="#FFFFFF"/>
+  <text x="750" y="48" text-anchor="middle" font-size="28" font-weight="bold" fill="#232F3E">Verifiable AWS Price Lake: Raw Zone Architecture</text>
+  <text x="750" y="80" text-anchor="middle" font-size="16" fill="#545B64">Stream AWS price files into a private S3 raw zone, record SHA-256 fingerprints in a manifest, then verify independently</text>
+
+  <!-- Column 1: AWS Price List API -->
+  <rect x="30" y="110" width="330" height="560" rx="14" fill="#F2F8FD" stroke="#0073BB" stroke-width="2"/>
+  <text x="195" y="142" text-anchor="middle" font-size="17" font-weight="bold" fill="#0073BB">AWS Price List Bulk API</text>
+  <text x="195" y="162" text-anchor="middle" font-size="13" fill="#545B64">public · pricing.us-east-1.amazonaws.com</text>
+  <rect x="55" y="185" width="280" height="90" rx="10" fill="#FFFFFF" stroke="#0073BB"/>
+  <text x="195" y="220" text-anchor="middle" font-size="16" font-weight="bold" fill="#232F3E">Service index</text>
+  <text x="195" y="245" text-anchor="middle" font-size="13" fill="#545B64">offers/v1.0/aws/index.json</text>
+  <line x1="195" y1="275" x2="195" y2="318" stroke="#37475A" stroke-width="2" marker-end="url(#ar)"/>
+  <rect x="55" y="320" width="280" height="90" rx="10" fill="#FFFFFF" stroke="#0073BB"/>
+  <text x="195" y="355" text-anchor="middle" font-size="16" font-weight="bold" fill="#232F3E">Region index (per service)</text>
+  <text x="195" y="380" text-anchor="middle" font-size="13" fill="#545B64">exact, versioned file URLs</text>
+  <line x1="195" y1="410" x2="195" y2="453" stroke="#37475A" stroke-width="2" marker-end="url(#ar)"/>
+  <rect x="55" y="455" width="280" height="190" rx="10" fill="#FFFFFF" stroke="#0073BB"/>
+  <text x="195" y="490" text-anchor="middle" font-size="16" font-weight="bold" fill="#232F3E">Regional price files (CSV)</text>
+  <text x="75" y="522" font-size="13" fill="#232F3E">S3 · Lambda · DynamoDB</text>
+  <text x="75" y="542" font-size="13" fill="#232F3E">API Gateway · Cognito</text>
+  <text x="75" y="570" font-size="13" fill="#545B64">us-east-1 · ap-southeast-1</text>
+  <text x="75" y="590" font-size="13" fill="#545B64">ap-northeast-1 · ap-southeast-2</text>
+  <text x="75" y="610" font-size="13" fill="#545B64">ap-south-1 · ap-east-1 · eu-west-1</text>
+  <text x="195" y="635" text-anchor="middle" font-size="13" font-weight="bold" fill="#0073BB">5 services × 7 regions = 35 pairs</text>
+
+  <!-- Trust principle -->
+  <rect x="30" y="700" width="330" height="170" rx="14" fill="#FFF8EC" stroke="#FF9900" stroke-width="2"/>
+  <text x="195" y="732" text-anchor="middle" font-size="16" font-weight="bold" fill="#C45500">Trust principle</text>
+  <text x="50" y="765" font-size="14" fill="#232F3E">1. Keep source bytes untouched</text>
+  <text x="50" y="792" font-size="14" fill="#232F3E">2. Record SHA-256 at ingestion</text>
+  <text x="50" y="819" font-size="14" fill="#232F3E">3. Verify independently before</text>
+  <text x="70" y="841" font-size="14" fill="#232F3E">any cleaning or comparison</text>
+
+  <!-- Column 2: CloudShell -->
+  <rect x="440" y="110" width="430" height="760" rx="14" fill="#F7F7F7" stroke="#37475A" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="655" y="142" text-anchor="middle" font-size="17" font-weight="bold" fill="#232F3E">AWS CloudShell (us-east-1)</text>
+  <text x="655" y="162" text-anchor="middle" font-size="13" fill="#545B64">~/aws-price-lake-raw · Bash · Python 3 · AWS CLI v2</text>
+
+  <rect x="465" y="185" width="380" height="185" rx="10" fill="#FFFFFF" stroke="#FF9900" stroke-width="2"/>
+  <text x="485" y="214" font-size="17" font-weight="bold" fill="#C45500">ingest.py</text>
+  <text x="485" y="242" font-size="13" fill="#232F3E">• Follows the indexes (no guessed URLs)</text>
+  <text x="485" y="264" font-size="13" fill="#232F3E">• Streams 1 MiB chunks to a temp file</text>
+  <text x="485" y="286" font-size="13" fill="#232F3E">• SHA-256 + byte count while downloading</text>
+  <text x="485" y="308" font-size="13" fill="#232F3E">• Size limit (100 / 250 MiB), one retry</text>
+  <text x="485" y="330" font-size="13" fill="#232F3E">• One status per pair: landed · unavailable</text>
+  <text x="497" y="350" font-size="13" fill="#232F3E">· error · size_limit_exceeded</text>
+
+  <rect x="465" y="395" width="380" height="135" rx="10" fill="#FFFFFF" stroke="#1D8102" stroke-width="2"/>
+  <text x="485" y="424" font-size="17" font-weight="bold" fill="#1D8102">verify.py</text>
+  <text x="485" y="452" font-size="13" fill="#232F3E">• Reads the manifest as a checklist</text>
+  <text x="485" y="474" font-size="13" fill="#232F3E">• Re-streams only landed objects</text>
+  <text x="485" y="496" font-size="13" fill="#232F3E">• Compares bytes + SHA-256 → PASS / FAIL</text>
+  <text x="485" y="518" font-size="13" fill="#232F3E">• Exit code 1 if any check fails</text>
+
+  <rect x="465" y="555" width="380" height="70" rx="10" fill="#FFFFFF" stroke="#7D3C98" stroke-width="2"/>
+  <text x="485" y="584" font-size="17" font-weight="bold" fill="#7D3C98">template.yaml</text>
+  <text x="485" y="608" font-size="13" fill="#232F3E">Infrastructure as Code for the raw bucket</text>
+
+  <rect x="465" y="650" width="380" height="95" rx="10" fill="#FFFFFF" stroke="#D13212" stroke-width="2"/>
+  <text x="485" y="679" font-size="17" font-weight="bold" fill="#D13212">cleanup.sh</text>
+  <text x="485" y="705" font-size="13" fill="#232F3E">• Default: dry run, lists objects only</text>
+  <text x="485" y="727" font-size="13" fill="#232F3E">• --confirm: empty bucket + delete stack</text>
+
+  <rect x="465" y="770" width="380" height="75" rx="10" fill="#FFFFFF" stroke="#879596"/>
+  <text x="485" y="799" font-size="15" font-weight="bold" fill="#37475A">price-list-manifest.json</text>
+  <text x="485" y="823" font-size="13" fill="#545B64">local fallback copy of the audit record</text>
+
+  <!-- Column 3: AWS account -->
+  <rect x="950" y="110" width="520" height="760" rx="14" fill="#FFFFFF" stroke="#232F3E" stroke-width="2"/>
+  <text x="1210" y="142" text-anchor="middle" font-size="17" font-weight="bold" fill="#232F3E">AWS account · us-east-1</text>
+
+  <rect x="975" y="165" width="470" height="365" rx="12" fill="#F2FAF0" stroke="#3F8624" stroke-width="2"/>
+  <text x="995" y="195" font-size="17" font-weight="bold" fill="#3F8624">Amazon S3 raw zone (private bucket)</text>
+  <text x="995" y="218" font-size="13" fill="#545B64">aws-price-lake-raw-&lt;account-id&gt;-us-east-1</text>
+  <rect x="995" y="232" width="135" height="26" rx="13" fill="#3F8624"/><text x="1062" y="250" text-anchor="middle" font-size="12" fill="#FFFFFF">AES-256 at rest</text>
+  <rect x="1138" y="232" width="170" height="26" rx="13" fill="#3F8624"/><text x="1223" y="250" text-anchor="middle" font-size="12" fill="#FFFFFF">4/4 public access blocked</text>
+  <rect x="1316" y="232" width="110" height="26" rx="13" fill="#3F8624"/><text x="1371" y="250" text-anchor="middle" font-size="12" fill="#FFFFFF">tagged · raw</text>
+
+  <rect x="995" y="275" width="430" height="110" rx="10" fill="#FFFFFF" stroke="#3F8624"/>
+  <text x="1015" y="303" font-size="15" font-weight="bold" fill="#232F3E">raw/</text>
+  <text x="1015" y="328" font-size="13" fill="#232F3E">service=&lt;service&gt;/region=&lt;region&gt;/index.csv</text>
+  <text x="1015" y="352" font-size="13" fill="#545B64">35 untouched CSV files (~2.8 MiB)</text>
+  <text x="1015" y="372" font-size="13" fill="#545B64">deterministic keys → reruns overwrite, no duplicates</text>
+
+  <rect x="995" y="400" width="430" height="110" rx="10" fill="#FFFFFF" stroke="#3F8624"/>
+  <text x="1015" y="428" font-size="15" font-weight="bold" fill="#232F3E">manifests/price-list-manifest.json</text>
+  <text x="1015" y="453" font-size="13" fill="#232F3E">per pair: status · source URL · version</text>
+  <text x="1015" y="475" font-size="13" fill="#232F3E">bytes · SHA-256 (landed entries only)</text>
+  <text x="1015" y="497" font-size="13" fill="#545B64">the evidence an S3 listing does not show</text>
+
+  <rect x="975" y="555" width="470" height="70" rx="10" fill="#F5EEF8" stroke="#7D3C98" stroke-width="2"/>
+  <text x="995" y="584" font-size="16" font-weight="bold" fill="#7D3C98">AWS CloudFormation</text>
+  <text x="995" y="608" font-size="13" fill="#232F3E">stack: price-lake-raw · owns the bucket</text>
+
+  <rect x="975" y="650" width="470" height="195" rx="12" fill="#FFF8EC" stroke="#FF9900" stroke-width="2"/>
+  <text x="995" y="680" font-size="16" font-weight="bold" fill="#C45500">Results</text>
+  <text x="995" y="708" font-size="14" fill="#232F3E">Ingestion:  landed=35  error=0  unavailable=0</text>
+  <text x="995" y="734" font-size="14" fill="#232F3E">Verification:  checked=35  failures=0</text>
+  <text x="995" y="764" font-size="14" font-weight="bold" fill="#232F3E">Recovery test</text>
+  <text x="995" y="788" font-size="13" fill="#232F3E">delete AmazonS3 us-east-1 object → FAIL (failures=1)</text>
+  <text x="995" y="810" font-size="13" fill="#232F3E">→ rerun ingest.py → PASS (failures=0)</text>
+  <text x="995" y="832" font-size="13" fill="#545B64">restored file has the same SHA-256 as the original</text>
+
+  <!-- Arrows -->
+  <path d="M335,550 C400,550 400,280 463,280" fill="none" stroke="#37475A" stroke-width="2.5" marker-end="url(#ar)"/>
+  <rect x="368" y="398" width="64" height="44" rx="6" fill="#FFFFFF"/>
+  <text x="400" y="416" text-anchor="middle" font-size="13" font-weight="bold" fill="#37475A">①</text>
+  <text x="400" y="434" text-anchor="middle" font-size="11" fill="#37475A">stream</text>
+
+  <line x1="845" y1="240" x2="993" y2="320" stroke="#37475A" stroke-width="2.5" marker-end="url(#ar)"/>
+  <rect x="876" y="246" width="68" height="40" rx="6" fill="#FFFFFF"/>
+  <text x="910" y="263" text-anchor="middle" font-size="13" font-weight="bold" fill="#37475A">②</text>
+  <text x="910" y="280" text-anchor="middle" font-size="11" fill="#37475A">PutObject</text>
+
+  <line x1="845" y1="330" x2="993" y2="440" stroke="#37475A" stroke-width="2.5" marker-end="url(#ar)"/>
+  <rect x="876" y="355" width="68" height="40" rx="6" fill="#FFFFFF"/>
+  <text x="910" y="372" text-anchor="middle" font-size="13" font-weight="bold" fill="#37475A">③</text>
+  <text x="910" y="389" text-anchor="middle" font-size="11" fill="#37475A">manifest</text>
+
+  <line x1="993" y1="480" x2="847" y2="470" stroke="#1D8102" stroke-width="2.5" marker-end="url(#ag)"/>
+  <rect x="876" y="455" width="68" height="40" rx="6" fill="#FFFFFF"/>
+  <text x="910" y="472" text-anchor="middle" font-size="13" font-weight="bold" fill="#1D8102">④</text>
+  <text x="910" y="489" text-anchor="middle" font-size="11" fill="#1D8102">re-stream</text>
+
+  <line x1="845" y1="590" x2="973" y2="590" stroke="#7D3C98" stroke-width="2.5" marker-end="url(#ar)"/>
+  <rect x="884" y="570" width="52" height="16" fill="#FFFFFF"/><text x="910" y="582" text-anchor="middle" font-size="12" fill="#7D3C98">deploy</text>
+
+  <line x1="1210" y1="555" x2="1210" y2="533" stroke="#7D3C98" stroke-width="2.5" marker-end="url(#ar)"/>
+
+  <path d="M845,700 L915,700 L915,615 L973,615" fill="none" stroke="#D13212" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+  <text x="903" y="657" text-anchor="middle" font-size="11" fill="#D13212" transform="rotate(-90 903 657)">--confirm</text>
+</svg>
